@@ -24,7 +24,7 @@ from model_utilities.training.modelfitting import get_device
 from tqdm import tqdm
 
 from single_pixel_attack import perturb_image  # gradient_importance.adverserial from git@github.com:feature-importance/model-utilities.git
-
+from os import makedirs, path
 
 def predict_classes(xs, img, target_class, net, minimize=True, device='cpu'):
     # perturbs each batch size copies of the img by setting /pixel/ pixels to new values determined by the tensor xs
@@ -191,7 +191,7 @@ def main():
                              'iteration.')
 
     args = parser.parse_args()
-
+    makedirs(path.dirname(args.save), exist_ok=True)  # make the save directory if needed
     modelfitting.FORCE_MPS=True
     device = get_device('auto')
 

@@ -13,9 +13,9 @@
 # Example Usage
 $ python attack.py --weights CIFAR10_s0
 
-or..
+or, to run a fairly short job:
 '''            "args": ["--weights", "CIFAR10_s0",
-                        "--pixels", "3", // 
+                        "--pixels", "1", // 
                         "--maxiter", "100",  // limit the evolution
                         "--popsize", "400",   // number of interventions per image?
                         "--samples", "10",  // number of images to try to perturb
@@ -25,5 +25,10 @@ or..
                         "--verbose"
 '''                        
 
-
+# Other files
 train.py is used to train a model on CIFAR10 images if needed.
+
+# Changes Needed
+1. log more than the first pixel changed if adjusting several
+1. improve logging to ensure perturbations can be read in and used for another experiment
+1. consider refactoring so that images can be perturbed using logged results read in and known seeds, datasets, model, weights etc
