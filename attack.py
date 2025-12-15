@@ -23,10 +23,12 @@ from torchbearer.magics import torchbearer
 from model_utilities.training.modelfitting import get_device
 from tqdm import tqdm
 
-from gradient_importance.adverserial.single_pixel_attack import perturb_image
+from single_pixel_attack import perturb_image  # gradient_importance.adverserial from git@github.com:feature-importance/model-utilities.git
 
 
 def predict_classes(xs, img, target_class, net, minimize=True, device='cpu'):
+    # perturbs each batch size copies of the img by setting /pixel/ pixels to new values determined by the tensor xs
+    # then predicts on these images and return the softmax predictions for the target_class passed in
     imgs_perturbed = perturb_image(xs, img.clone())
     input = imgs_perturbed.to(device)
     predictions = F.softmax(net(input), dim=1).cpu().numpy()[:, target_class]
@@ -117,7 +119,9 @@ def attack_all(net, loader, pixels=1, targeted=False, maxiter=75, popsize=400,
 
             targets = [None] if not targeted else range(10)
 
-            for target_class in targets:
+            for target_class in targets:  
+                # Note this executes once if targets is [None]
+                # otherwise it will try each target_class other than the true label (target[0]) of the image
                 if targeted:
                     if target_class == target[0]:
                         continue
@@ -166,7 +170,7 @@ def main():
                              'the name of the specific WeightsEnum for the '
                              'model', required=True)
     parser.add_argument('--pixels', default=1, type=int,
-                        help='The number of pixels that can be perturbed.')
+                        help='The number of pixels that can be perturbed in each image.')
     parser.add_argument('--maxiter', default=100, type=int,
                         help='The maximum number of iteration in the DE '
                              'algorithm.')
@@ -177,11 +181,11 @@ def main():
                         help='The number of image samples to adverserial. Default '
                              'is to adverserial all images.')
     parser.add_argument('--targeted', action='store_true',
-                        help='Set this switch to test for targeted attacks.')
+                        help='Set this switch to try to perturb each image to every incorrect class')
     parser.add_argument('--save', default='./results/results.csv',
                         help='Save location for the results.')
     parser.add_argument('--data', default=str(Path.home()) + "/data/",
-                        help='Data location')
+                        help='Data location for storing image dataset')
     parser.add_argument('--verbose', action='store_true',
                         help='Print out additional information every '
                              'iteration.')
@@ -226,6 +230,8 @@ def main():
     print("Final success rate: %.4f" % results)
 
     with open(args.save, 'w') as f:
+        # Log index of image an pixel perturbation values for successful attacks
+        # FIXME this only logs one of the pixels
         f.write("idx,row,col,r,g,b\n")
         for k, v in attack_data.items():
             v = v["pixel"]

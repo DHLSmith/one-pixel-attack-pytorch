@@ -8,3 +8,22 @@
 |vgg16   |     93.42%             |              ~50.0%                |         ~93.0%           |
 |res18   |     94.94%             |              ~27.7%               |         ~78.0%           |
 |res101  |     94.51%             |              ~19.0%               |         ~63.3%                  |               
+
+
+# Example Usage
+$ python attack.py --weights CIFAR10_s0
+
+or..
+'''            "args": ["--weights", "CIFAR10_s0",
+                        "--pixels", "3", // 
+                        "--maxiter", "100",  // limit the evolution
+                        "--popsize", "400",   // number of interventions per image?
+                        "--samples", "10",  // number of images to try to perturb
+                        //"--targeted", 
+                        //"--save", "",
+                        //[--data DATA]
+                        "--verbose"
+'''                        
+
+
+train.py is used to train a model on CIFAR10 images if needed.
