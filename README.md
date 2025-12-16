@@ -26,9 +26,11 @@ or, to run a fairly short job:
 '''                        
 
 # Other files
-train.py is used to train a model on CIFAR10 images if needed.
+* *train.py* is used to train a model on CIFAR10 images if needed.
+* *single_pixel_attack.py* contains __perturb_image()__ which applies a set of pixel perturbations to an input image and returns the set of perturbed versions of that image
 
 # Changes Needed
+1. allow seeding to ensure repeatability
 1. log more than the first pixel changed if adjusting several
 1. improve logging to ensure perturbations can be read in and used for another experiment
 1. consider refactoring so that images can be perturbed using logged results read in and known seeds, datasets, model, weights etc

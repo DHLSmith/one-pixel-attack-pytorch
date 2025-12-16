@@ -53,7 +53,15 @@ def attack_success(x, img, target_class, net, targeted_attack=False,
 def attack(img, label, net, target=None, pixels=1, maxiter=75, popsize=400,
            verbose=False, device='cpu'):
     # img: 1*3*W*H tensor
-    # label: a number
+    # label: true class of image
+    # 
+    ############
+    # returns:
+    # Returns a tuple of integers
+    # success (1 = True)
+    # result - i.e. the set of pixels that worked as integers [x,y,r,g,b]...
+    # predicted class (i.e. what the model predicts for the attacked image)
+    # label : the true class of the un-attacked image
 
     targeted_attack = target is not None
     target_class = target if targeted_attack else label
@@ -68,10 +76,11 @@ def attack(img, label, net, target=None, pixels=1, maxiter=75, popsize=400,
     inits = np.zeros([popsize, len(bounds)])
     for init in inits:
         for i in range(pixels):
-            init[i * 5 + 0] = np.random.random() * 32
+            # initialises a popsize * pixels set of randomly chosen and colourized pixels
+            init[i * 5 + 0] = np.random.random() * 32  # floats in range [0,32)
             init[i * 5 + 1] = np.random.random() * 32
-            init[i * 5 + 2] = np.random.normal(128, 127)
-            init[i * 5 + 3] = np.random.normal(128, 127)
+            init[i * 5 + 2] = np.random.normal(128, 127)  # centred on 128 with std-dev of 127. Therefore can return negative values or > 255
+            init[i * 5 + 3] = np.random.normal(128, 127)  # differential_evolution() will clip these values to bounds before use
             init[i * 5 + 4] = np.random.normal(128, 127)
 
     attack_result = differential_evolution(predict_fn, bounds, maxiter=maxiter,
@@ -83,7 +92,7 @@ def attack(img, label, net, target=None, pixels=1, maxiter=75, popsize=400,
                                            init=inits,
                                            updating='deferred',
                                            vectorized=True)
-
+    
     attack_image = perturb_image(attack_result.x, img)
     attack_var = attack_image.to(device)
     predicted_probs = F.softmax(net(attack_var), dim=1).cpu().numpy()[0]
